@@ -1,0 +1,16 @@
+{
+    "actorSpecification": 1,
+    "name": "author-finder",
+    "title": "Tomba Author Finder",
+    "description": "Find author information from web pages using the Tomba API.",
+    "version": "0.1",
+    "buildTag": "latest",
+    "meta": {
+        "templateId": "ts-empty"
+    },
+    "dockerfile": "../Dockerfile",
+    "input": "./input_schema.json",
+    "storages": {
+        "dataset": "./dataset_schema.json"
+    }
+}
