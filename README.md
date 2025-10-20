@@ -58,11 +58,11 @@ For each discovered author, you'll receive:
 
 ### Required Parameters
 
-| Parameter        | Type     | Description                     |
-| ---------------- | -------- | ------------------------------- | ------------------------------------ |
-| `tombaApiKey`    | `string` | Your Tomba API key (ta_xxxx)    |
-| `tombaApiSecret` | `string` | Your Tomba secret key (ts_xxxx) |
-| `urls`           | `array`  | `[]`                            | Array of URLs to analyze for authors |
+| Parameter        | Type     | Description                            |
+| ---------------- | -------- | -------------------------------------- |
+| `tombaApiKey`    | `string` | Your Tomba API key (ta_xxxx)           |
+| `tombaApiSecret` | `string` | Your Tomba secret key (ts_xxxx)        |
+| `urls`           | `array`  | ` Array of URLs to analyze for authors |
 
 ### Optional Parameters
 
