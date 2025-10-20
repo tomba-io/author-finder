@@ -59,16 +59,16 @@ For each discovered author, you'll receive:
 ### Required Parameters
 
 | Parameter        | Type     | Description                     |
-| ---------------- | -------- | ------------------------------- |
+| ---------------- | -------- | ------------------------------- | ------------------------------------ |
 | `tombaApiKey`    | `string` | Your Tomba API key (ta_xxxx)    |
 | `tombaApiSecret` | `string` | Your Tomba secret key (ts_xxxx) |
+| `urls`           | `array`  | `[]`                            | Array of URLs to analyze for authors |
 
 ### Optional Parameters
 
-| Parameter    | Type     | Default | Description                          |
-| ------------ | -------- | ------- | ------------------------------------ |
-| `urls`       | `array`  | `[]`    | Array of URLs to analyze for authors |
-| `maxResults` | `number` | `50`    | Maximum number of results to return  |
+| Parameter    | Type     | Default | Description                         |
+| ------------ | -------- | ------- | ----------------------------------- |
+| `maxResults` | `number` | `50`    | Maximum number of results to return |
 
 ### Example Input
 
