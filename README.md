@@ -44,6 +44,10 @@ For each discovered author, you'll receive:
 
 ## Quick Start
 
+### Prerequisites
+
+1. **Tomba Account**: Sign up at [Tomba.io](https://app.tomba.io/api) to get your API credentials
+
 ### Getting Your API Keys
 
 1. Visit [Tomba API Dashboard](https://app.tomba.io/api)
