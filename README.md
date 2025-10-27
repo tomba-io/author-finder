@@ -159,3 +159,24 @@ The Actor returns detailed author information for each discovered author:
 - Each URL processed = 1 Tomba API request
 - Monitor your Tomba usage dashboard
 - Consider Tomba's pricing tiers for volume usage
+
+## Keywords
+
+author finder, email discovery, content attribution, author identification, web scraping, contact extraction, email verification, Tomba API, Apify actor, author detection, content marketing, influencer outreach, research tool, author analysis, email outreach
+
+## Support
+
+If you need any help, have questions, or encounter any issues while using Tomba.io, please don't hesitate to reach out to our support team. You can contact us via:
+
+- **Email**: support@tomba.io
+- **Live chat**: Available on the Tomba.io website during business hours
+
+## Contributing
+
+We welcome contributions to improve this actor. Please feel free to submit issues, feature requests, or pull requests to help make this tool even better for the community.
+
+## About Tomba
+
+Founded in 2020, Tomba prides itself on being the most reliable, accurate, and in-depth source of email address data available anywhere. We process terabytes of data to produce our Email finder API.
+
+![Tomba Logo](https://tomba.io/logo.png)
