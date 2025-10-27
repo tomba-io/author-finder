@@ -1,0 +1,113 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Author Finder Output",
+    "type": "object",
+    "description": "Output schema for Tomba Author Finder Actor",
+    "properties": {
+        "email": {
+            "type": "string",
+            "description": "Author's email address",
+            "example": "author@example.com"
+        },
+        "first_name": {
+            "type": ["string", "null"],
+            "description": "Author's first name",
+            "example": "John"
+        },
+        "last_name": {
+            "type": ["string", "null"],
+            "description": "Author's last name",
+            "example": "Doe"
+        },
+        "full_name": {
+            "type": ["string", "null"],
+            "description": "Author's full name",
+            "example": "John Doe"
+        },
+        "website_url": {
+            "type": ["string", "null"],
+            "description": "Website URL associated with the author",
+            "example": "example.com"
+        },
+        "company": {
+            "type": ["string", "null"],
+            "description": "Author's company or organization",
+            "example": "Example Corp"
+        },
+        "position": {
+            "type": ["string", "null"],
+            "description": "Author's job title or position",
+            "example": "Content Writer"
+        },
+        "country": {
+            "type": ["string", "null"],
+            "description": "Author's country",
+            "example": "US"
+        },
+        "twitter": {
+            "type": ["string", "null"],
+            "description": "Author's Twitter profile URL",
+            "example": "https://twitter.com/johndoe"
+        },
+        "linkedin": {
+            "type": ["string", "null"],
+            "description": "Author's LinkedIn profile URL",
+            "example": "https://linkedin.com/in/johndoe"
+        },
+        "score": {
+            "type": ["number", "null"],
+            "description": "Confidence score (0-100)",
+            "example": 95
+        },
+        "verification": {
+            "type": ["object", "null"],
+            "description": "Email verification details",
+            "properties": {
+                "date": {
+                    "type": "string",
+                    "description": "Verification date"
+                },
+                "status": {
+                    "type": "string",
+                    "description": "Verification status"
+                }
+            }
+        },
+        "sources": {
+            "type": "array",
+            "description": "Sources where author information was found",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "uri": {
+                        "type": "string",
+                        "description": "Source URL"
+                    },
+                    "website_url": {
+                        "type": "string",
+                        "description": "Website domain"
+                    },
+                    "extracted_on": {
+                        "type": "string",
+                        "description": "Extraction date"
+                    },
+                    "last_seen_on": {
+                        "type": "string",
+                        "description": "Last seen date"
+                    },
+                    "still_on_page": {
+                        "type": "boolean",
+                        "description": "Whether still found on page"
+                    }
+                }
+            }
+        },
+        "error": {
+            "type": ["string", "null"],
+            "description": "Error message if the search failed",
+            "example": "API rate limit exceeded"
+        }
+    },
+    "required": ["email"],
+    "additionalProperties": false
+}
