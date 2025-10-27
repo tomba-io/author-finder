@@ -162,7 +162,7 @@ The Actor returns detailed author information for each discovered author:
 
 ## Keywords
 
-author finder, email discovery, content attribution, author identification, web scraping, contact extraction, email verification, Tomba API, Apify actor, author detection, content marketing, influencer outreach, research tool, author analysis, email outreach
+author finder, email discovery, content attribution, author identification, web scraping, contact extraction, email verification, author detection, content marketing, influencer outreach, research tool, author analysis, email outreach
 
 ## Support
 
