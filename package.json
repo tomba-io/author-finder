@@ -1,6 +1,6 @@
 {
     "name": "author-finder",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "type": "module",
     "description": "Find author information from web pages using the Tomba API.",
     "engines": {
