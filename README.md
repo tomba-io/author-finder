@@ -160,6 +160,41 @@ The Actor returns detailed author information for each discovered author:
 - Monitor your Tomba usage dashboard
 - Consider Tomba's pricing tiers for volume usage
 
+## FAQ
+
+### General Questions
+
+**Q: What does author finding do?**
+A: Author finding analyzes web pages to identify and extract author information, including names, contact details, social profiles, and professional information from articles, blog posts, and content pages.
+
+**Q: What types of pages work best for author detection?**
+A: Blog posts, articles, author pages, team pages, and content with clear bylines work best. Pages with structured author information yield the most comprehensive results.
+
+**Q: What information can I extract about authors?**
+A: You can get author names, email addresses, social media profiles, bio information, job titles, and links to other authored content.
+
+### Technical Questions
+
+**Q: How many URLs can I process at once?**
+A: You can process up to 1000 URLs per run. For optimal performance, process 20-50 URLs per batch.
+
+**Q: What URL formats are supported?**
+A: Any valid HTTP/HTTPS URL can be processed. Blog posts, article pages, and author bio pages typically yield the best results.
+
+**Q: What if a page doesn't have clear author information?**
+A: Some pages may return limited or no author data. This is normal for pages without bylines or clear authorship attribution.
+
+### Business Applications
+
+**Q: How can this help with content marketing?**
+A: Find contact information for authors in your industry to build relationships, guest posting opportunities, and content partnerships.
+
+**Q: Is this useful for journalism or research?**
+A: Yes! Identify and contact authors, researchers, and experts for interviews, quotes, or collaboration opportunities.
+
+**Q: Can I use this for influencer outreach?**
+A: Absolutely! Discover content creators and thought leaders in your space, then get their contact information for partnership opportunities.
+
 ## Keywords
 
 author finder, email discovery, content attribution, author identification, web scraping, contact extraction, email verification, author detection, content marketing, influencer outreach, research tool, author analysis, email outreach
