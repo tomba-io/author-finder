@@ -67,7 +67,7 @@ Author Finder costs 1 credit per billable URL (one `tomba-request` event); the i
 
 ## Architecture
 
-- `src/tomba.ts`: shared helper, identical in every Tomba Actor. It handles credentials, caching (`tomba-cache` key-value store), retries with exponential backoff, pay-per-event charging, budget reservation, the concurrency pool and resume state.
+- `src/tomba.ts`: shared helper, identical in every Tomba Actor. It handles credentials, caching (per-Actor `tomba-cache-<actorId>` key-value store; falls back to an in-run cache if it can't be opened), retries with exponential backoff, pay-per-event charging, budget reservation, the concurrency pool and resume state.
 - `src/main.ts`: trims and deduplicates `urls`, limits them to `maxResults`, calls `GET /author-finder?url=…` (`Finder.authorFinder(url, webhook_url)`) for each one and pushes one item per URL: the Tomba `data` object plus `input_url`, `source`, `chargedCredits`, `charged` and `cached`, or an `error` item with `email: null` and `chargedCredits: 0` when nothing billable came back. `webhook_url` is only sent when `webhookUrl` is non-blank and is part of the cache key.
 - The `tomba` SDK v1.1.1 resolves every call to `{ data, rateLimit }`, where `data` is the response body. Its `.d.ts` types still declare the old return type, so always go through `callTomba()`.
 
@@ -100,7 +100,7 @@ curl "localhost:8080/?url=https%3A%2F%2Fwww.shopify.com%2Fblog%2Fself-publish-a-
 
 ## Key-value store schema
 
-`.actor/key_value_store_schema.json` documents the default key-value store records (`INPUT`, `TOMBA_STATE`). The cross-run cache lives in the separate named store `tomba-cache`.
+`.actor/key_value_store_schema.json` documents the default key-value store records (`INPUT`, `TOMBA_STATE`). The cross-run cache lives in the separate named store `tomba-cache-<actorId>`, one per Actor: under limited permissions an Actor can only open named storages it created itself, so the Tomba Actors must not share one store. If the store can't be opened, the run logs a warning and caches for this run only.
 
 ## Memory
 
