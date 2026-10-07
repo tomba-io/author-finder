@@ -78,3 +78,30 @@ Author Finder costs 1 credit per billable URL (one `tomba-request` event); the i
 - `test/helpers.ts`: mock server and Actor runner (identical in every Actor)
 
 Locally, the Apify SDK prices every event at $1 when `ACTOR_TEST_PAY_PER_EVENT=true`, so the tests use `maxTotalChargeUsd` as an event count.
+
+## Standby mode (real-time API)
+
+`.actor/actor.json` sets `usesStandbyMode: true` and `webServerSchema: ./web_server_schema.json` (OpenAPI 3).
+
+- `src/standby.ts` (shared, identical in every Actor): `runActor()` runs a batch job, or, when `APIFY_META_ORIGIN=STANDBY`, starts an HTTP server on `Actor.config.get('containerPort')`.
+    - `GET /` with the `x-apify-container-server-readiness-probe` header, or with no query: readiness / usage.
+    - `GET /?…`: input built by `fromQuery()` from `url` / `urls` (repeated or comma-separated, so URLs containing commas need `POST`), `webhookUrl` and `maxResults`.
+    - `POST /`: the same JSON input as a batch run.
+    - Responses: `200 { items }`, `400` invalid input, `402` max charge limit reached, `404`, `405`.
+- `run(input, ctx)` in `src/main.ts` is shared by both modes: `ctx.push()` writes to the dataset in batch runs and to the HTTP response in Standby; `ctx.isDone()`/`ctx.markDone()` persist resume state only in batch runs. Input errors throw `InputError` (failed run in batch, `400` in Standby).
+- Caching and pay-per-event charging work the same in both modes.
+
+Try it locally:
+
+```bash
+APIFY_META_ORIGIN=STANDBY ACTOR_WEB_SERVER_PORT=8080 TOMBA_API_KEY=ta_… TOMBA_API_SECRET=ts_… npm start
+curl "localhost:8080/?url=https%3A%2F%2Fwww.shopify.com%2Fblog%2Fself-publish-a-book"
+```
+
+## Key-value store schema
+
+`.actor/key_value_store_schema.json` documents the default key-value store records (`INPUT`, `TOMBA_STATE`). The cross-run cache lives in the separate named store `tomba-cache`.
+
+## Memory
+
+`defaultMemoryMbytes` is 256: the Actor only makes HTTP calls, so more memory just costs more.

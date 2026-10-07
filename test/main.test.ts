@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { after, afterEach, describe, it } from 'node:test';
 
 import type { MockHandler, MockServer } from './helpers.js';
-import { removeStorage, runActor, startMockTomba, totalCharges } from './helpers.js';
+import { removeStorage, runActor, startMockTomba, startStandbyActor, totalCharges } from './helpers.js';
 
 const ARTICLE = 'https://www.shopify.com/blog/self-publish-a-book';
 
@@ -292,5 +292,127 @@ describe('author-finder', () => {
         const result = await run({ input: { urls: [] }, endpoint: server.url });
         assert.notEqual(result.code, 0);
         assert.equal(server.requests.length, 0);
+    });
+});
+
+describe('author-finder standby (real-time API)', () => {
+    it('answers the readiness probe and a bare GET with usage info', async () => {
+        const server = await mock();
+        const actor = await startStandbyActor({ endpoint: server.url });
+        try {
+            const probe = await actor.call('/', { headers: { 'x-apify-container-server-readiness-probe': '1' } });
+            assert.equal(probe.status, 200);
+            const usage = await actor.call('/');
+            assert.equal(usage.status, 200);
+            assert.match(String(usage.body.usage), /GET/);
+            assert.equal(server.requests.length, 0);
+        } finally {
+            await actor.stop();
+        }
+    });
+
+    it('looks up URLs from GET query parameters and charges per billable URL', async () => {
+        const server = await mock();
+        const actor = await startStandbyActor({ endpoint: server.url });
+        let stopped;
+        try {
+            const query = new URLSearchParams([
+                ['url', ARTICLE],
+                ['url', 'https://example.com/empty'],
+                ['webhookUrl', 'https://hooks.example.com/tomba'],
+            ]);
+            const res = await actor.call(`/?${query}`);
+            assert.equal(res.status, 200);
+            const items = res.body.items as Record<string, unknown>[];
+            assert.deepEqual(
+                items.find((i) => i.input_url === ARTICLE),
+                {
+                    ...AUTHOR,
+                    input_url: ARTICLE,
+                    source: 'tomba_author_finder',
+                    chargedCredits: 1,
+                    charged: true,
+                    cached: false,
+                },
+            );
+            assert.equal(items.find((i) => i.input_url === 'https://example.com/empty')?.error, 'No author found');
+            assert.ok(server.requests.every((r) => r.query.webhook_url === 'https://hooks.example.com/tomba'));
+        } finally {
+            stopped = await actor.stop();
+        }
+        assert.deepEqual(stopped.chargeCounts, { 'tomba-request': 1 });
+    });
+
+    it('accepts a POST with the same JSON input as a normal run', async () => {
+        const server = await mock();
+        const actor = await startStandbyActor({ endpoint: server.url });
+        try {
+            const res = await actor.call('/', {
+                body: { urls: ['https://a.com/post', 'https://b.com/post', 'https://c.com/post'], maxResults: 2 },
+            });
+            assert.equal(res.status, 200);
+            assert.equal((res.body.items as unknown[]).length, 2);
+            assert.equal(server.requests.length, 2);
+        } finally {
+            await actor.stop();
+        }
+    });
+
+    it('serves repeated requests from the cache for free', async () => {
+        const server = await mock();
+        const actor = await startStandbyActor({ endpoint: server.url });
+        let stopped;
+        try {
+            await actor.call(`/?url=${encodeURIComponent(ARTICLE)}`);
+            const second = await actor.call(`/?url=${encodeURIComponent(ARTICLE)}`);
+            assert.ok((second.body.items as Record<string, unknown>[]).every((i) => i.cached === true));
+            assert.equal(server.requests.length, 1);
+        } finally {
+            stopped = await actor.stop();
+        }
+        assert.deepEqual(stopped.chargeCounts, { 'tomba-request': 1 });
+    });
+
+    it('keeps serving after a request hits maxResults', async () => {
+        const server = await mock();
+        const actor = await startStandbyActor({ endpoint: server.url });
+        try {
+            const first = await actor.call('/?url=https://a.com/post&url=https://b.com/post&maxResults=1');
+            assert.equal((first.body.items as unknown[]).length, 1);
+            const second = await actor.call('/?urls=https://c.com/post,https://d.com/post');
+            assert.equal((second.body.items as unknown[]).length, 2);
+        } finally {
+            await actor.stop();
+        }
+    });
+
+    it('rejects invalid input with 400 and unknown paths with 404', async () => {
+        const server = await mock();
+        const actor = await startStandbyActor({ endpoint: server.url });
+        try {
+            assert.equal((await actor.call('/', { body: {} })).status, 400);
+            assert.equal((await actor.call('/', { body: { urls: ARTICLE } })).status, 400);
+            assert.equal((await actor.call('/', { body: 'not json' })).status, 400);
+            assert.equal((await actor.call('/?maxResults=abc&url=https://a.com/post')).status, 400);
+            assert.equal((await actor.call('/nope')).status, 404);
+            assert.equal((await actor.call('/', { method: 'DELETE' })).status, 405);
+            assert.equal(server.requests.length, 0);
+        } finally {
+            await actor.stop();
+        }
+    });
+
+    it('returns 402 once the max charge limit is reached', async () => {
+        const server = await mock();
+        const actor = await startStandbyActor({ endpoint: server.url, maxTotalChargeUsd: 1 });
+        try {
+            const first = await actor.call('/?url=https://a.com/post');
+            assert.equal(first.status, 200);
+            const second = await actor.call('/?url=https://b.com/post');
+            assert.equal(second.status, 402);
+            assert.equal(server.requests.length, 1);
+        } finally {
+            await actor.stop();
+        }
     });
 });

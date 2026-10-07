@@ -1,0 +1,403 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Tomba Author Finder API",
+        "version": "1.0.0",
+        "description": "Real-time API (Apify Standby mode). Find the author of an article URL with their email, position and social profiles. Each URL with an answer costs 1 credit ($0.00312), including authors identified without an email address; URLs with no author, errors and cached results are free. A `webhookUrl` does not change the price."
+    },
+    "paths": {
+        "/": {
+            "get": {
+                "summary": "Find the authors of one or more article URLs",
+                "description": "Without query parameters, returns a short usage note (also used as the readiness probe).",
+                "parameters": [
+                    {
+                        "name": "url",
+                        "in": "query",
+                        "description": "Article URL. Repeat the parameter or separate values with commas for several URLs (use POST for URLs that contain commas). URL-encode the value.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "https://www.shopify.com/blog/self-publish-a-book"
+                    },
+                    {
+                        "name": "urls",
+                        "in": "query",
+                        "description": "Alias of `url`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "webhookUrl",
+                        "in": "query",
+                        "description": "Optional URL that Tomba also sends each result to (sent as `webhook_url`). Does not change the price.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "maxResults",
+                        "in": "query",
+                        "description": "Maximum number of URLs to process (default 50).",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "default": 50
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/Results"
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/Error"
+                    },
+                    "402": {
+                        "$ref": "#/components/responses/Error"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Find authors using a JSON input",
+                "description": "Accepts the same JSON input as a normal Actor run.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "urls": {
+                                        "type": "array",
+                                        "description": "Array of URLs to find authors from. Each URL will be processed to extract author information.",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": [
+                                            "https://www.shopify.com/blog/self-publish-a-book",
+                                            "https://blog.example.com/about-author",
+                                            "https://company.com/team"
+                                        ]
+                                    },
+                                    "maxResults": {
+                                        "type": "integer",
+                                        "description": "Maximum number of article URLs to process in this run",
+                                        "minimum": 1,
+                                        "maximum": 1000,
+                                        "default": 50,
+                                        "example": 50
+                                    },
+                                    "webhookUrl": {
+                                        "type": "string",
+                                        "description": "Optional URL that Tomba also sends each result to (sent as `webhook_url`). Must start with http:// or https://. Does not change the price.",
+                                        "pattern": "^https?://"
+                                    }
+                                },
+                                "required": ["urls"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/Results"
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/Error"
+                    },
+                    "402": {
+                        "$ref": "#/components/responses/Error"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "responses": {
+            "Results": {
+                "description": "Author results, in the same format as the dataset items.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "items": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Author"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "Error": {
+                "description": "Invalid input (400) or the run's max charge limit was reached (402).",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "schemas": {
+            "Author": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Author's email address"
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Author's first name"
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Author's last name"
+                    },
+                    "full_name": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Author's full name"
+                    },
+                    "website_url": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Website URL associated with the author"
+                    },
+                    "company": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Author's company or organization"
+                    },
+                    "position": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Author's job title or position"
+                    },
+                    "country": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Author's country"
+                    },
+                    "gender": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Author's gender"
+                    },
+                    "twitter": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Author's Twitter profile URL"
+                    },
+                    "linkedin": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Author's LinkedIn profile URL"
+                    },
+                    "score": {
+                        "type": "number",
+                        "nullable": true,
+                        "description": "Confidence score for the author information (0-100)"
+                    },
+                    "accept_all": {
+                        "type": "boolean",
+                        "nullable": true,
+                        "description": "Whether the domain accepts all emails"
+                    },
+                    "phone_number": {
+                        "type": "boolean",
+                        "nullable": true,
+                        "description": "Whether a phone number is available for this author"
+                    },
+                    "info": {
+                        "type": "object",
+                        "nullable": true,
+                        "description": "Additional detailed information about the author and source",
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Page title where the author was found"
+                            },
+                            "description": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Page description or meta description"
+                            },
+                            "first_name": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "First name from page metadata"
+                            },
+                            "last_name": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Last name from page metadata"
+                            },
+                            "full_name": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Full name from page metadata"
+                            },
+                            "article_domain": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Domain of the article or page"
+                            },
+                            "same_as_domain": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Whether the domain matches expected domain"
+                            },
+                            "linkedin": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "LinkedIn handle from page metadata"
+                            },
+                            "twitter": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Twitter handle from page metadata"
+                            },
+                            "phone": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Phone number from page metadata"
+                            },
+                            "email": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Email from page metadata"
+                            },
+                            "gender": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Gender from page metadata"
+                            },
+                            "position": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Position from page metadata"
+                            },
+                            "image": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Author image URL from page metadata"
+                            },
+                            "gravatar": {
+                                "type": "boolean",
+                                "nullable": true,
+                                "description": "Whether author has a Gravatar"
+                            },
+                            "emails": {
+                                "type": "array",
+                                "nullable": true,
+                                "description": "Array of additional emails found",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "verification": {
+                        "type": "object",
+                        "nullable": true,
+                        "description": "Email verification information from Tomba",
+                        "properties": {
+                            "date": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Date when the email was verified (ISO format)"
+                            },
+                            "status": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Verification status (valid, invalid, unknown)"
+                            }
+                        }
+                    },
+                    "sources": {
+                        "type": "array",
+                        "nullable": true,
+                        "description": "Sources where the author information was found",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string",
+                                    "nullable": true,
+                                    "description": "URI where the email was found"
+                                },
+                                "website_url": {
+                                    "type": "string",
+                                    "nullable": true,
+                                    "description": "Website URL where the email was found"
+                                },
+                                "extracted_on": {
+                                    "type": "string",
+                                    "nullable": true,
+                                    "description": "Date when the email was extracted (ISO format)"
+                                },
+                                "last_seen_on": {
+                                    "type": "string",
+                                    "nullable": true,
+                                    "description": "Date when the email was last seen (ISO format)"
+                                },
+                                "still_on_page": {
+                                    "type": "boolean",
+                                    "nullable": true,
+                                    "description": "Whether the email is still on the page"
+                                }
+                            }
+                        }
+                    },
+                    "chargedCredits": {
+                        "type": "integer",
+                        "description": "Credits billed for this URL ($0.00312 each): 1 when charged, otherwise 0"
+                    },
+                    "charged": {
+                        "type": "boolean",
+                        "description": "Whether this request was charged (pay-per-event)"
+                    },
+                    "cached": {
+                        "type": "boolean",
+                        "description": "Whether the result came from the cache (free)"
+                    },
+                    "input_url": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Input article URL"
+                    },
+                    "source": {
+                        "type": "string",
+                        "description": "Data source identifier (tomba_author_finder)"
+                    },
+                    "error": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Error message if the search failed"
+                    }
+                }
+            }
+        }
+    }
+}

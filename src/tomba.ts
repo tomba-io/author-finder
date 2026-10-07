@@ -99,6 +99,12 @@ export async function setupTomba(runOptions: RunOptions = {}): Promise<TombaClie
     return client;
 }
 
+/** The Tomba client created by setupTomba(). */
+export function getClient(): TombaClient {
+    if (!client) throw new Error('setupTomba() must be called first');
+    return client;
+}
+
 export function getOptions(): Required<RunOptions> {
     return options;
 }
@@ -202,15 +208,19 @@ export async function callTomba(
     }
 }
 
-/** Run `worker` over `items` with bounded concurrency; stops picking new items once `isStopped()` is true. */
+/**
+ * Run `worker` over `items` with bounded concurrency. Stops picking new items once the charge limit
+ * is reached (`isStopped()`) or `shouldStop()` returns true (e.g. maxResults reached for this run).
+ */
 export async function runPool<T>(
     items: T[],
     worker: (item: T, index: number) => Promise<void>,
     concurrency = options.maxConcurrency,
+    shouldStop: () => boolean = () => false,
 ): Promise<void> {
     let next = 0;
     const runners = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
-        while (!stopped && next < items.length) {
+        while (!stopped && !shouldStop() && next < items.length) {
             const index = next++;
             await worker(items[index], index);
         }
