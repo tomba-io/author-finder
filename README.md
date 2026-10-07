@@ -1,217 +1,208 @@
-# Tomba Author Finder Actor
+# Tomba Author Finder
 
-[![Actor](https://img.shields.io/badge/Apify-Actor-blue)](https://apify.com/actors)
-[![Tomba API](https://img.shields.io/badge/Tomba-API-green)](https://tomba.io)
-[![Rate Limit](https://img.shields.io/badge/Rate%20Limit-150%2Fmin-orange)](https://tomba.io/api)
+[![Price](https://img.shields.io/badge/Price-%243.12%20per%201K%20URLs-brightgreen)](#pricing)
+[![No signup](https://img.shields.io/badge/Tomba%20account-not%20needed-blue)](#quick-start)
+[![No rate limit](https://img.shields.io/badge/Rate%20limit-none-brightgreen)](#built-for-big-lists)
 
-A powerful Apify Actor that discovers and extracts author information from web pages using the **Tomba Author Finder API**. Perfect for content creators, researchers, and marketers who need to identify and verify author details from articles, blog posts, and web content.
+**Turn any article into a verified contact.** Paste blog post or article URLs and get the author's name, verified email address, position, company and social profiles, ready to export.
 
-## Key Features
+No Tomba account. No API key. No subscription. **You pay $0.00312 per URL, and only when we find something.**
 
-- **Author Discovery**: Extract author information directly from web page URLs
-- **Email Verification**: Get verified email addresses with confidence scores
-- **Professional Details**: Company, position, and contact information
-- **Social Profiles**: Twitter, LinkedIn, and other social media links
-- **Bulk Processing**: Process multiple URLs efficiently with rate limiting
-- **Rate Limited**: Respects Tomba's 150 requests per minute limit
-- **Rich Data Output**: Comprehensive author profiles with metadata
-- **Built-in Verification**: Email validation and confidence scoring
+## Why teams choose this Actor
 
-## How it works
+- **Start in 30 seconds**: Open the Actor, paste your article URLs, click Start. Nothing to sign up for
+- **Verified emails**: Each author email comes with its verification status and a confidence score
+- **Pay only for results**: URLs with no author, errors and invalid inputs are free
+- **$3.12 per 1,000 URLs**: No monthly plan, no credits that expire, no minimum spend
+- **Built for big lists**: No rate limit. Thousands of URLs run in parallel
+- **Never pay twice**: URLs you looked up in the last 24 hours come back from cache for free
+- **Export anywhere**: Download as CSV, Excel or JSON, or send results straight to your CRM with Apify integrations
 
-The Actor leverages Tomba's powerful Author Finder API to extract comprehensive author information:
+## Promises we actually keep
 
-### Process Flow
+- **Less than 5% bounce rate** — Every email is verified in real time before you're charged.
+- **Highest coverage on the market** — 81% email coverage. That's 2x more valid emails than the next best competitor. We find contacts others simply can't.
 
-1. **Authentication**: Connects to Tomba API using your credentials
-2. **Input Processing**: Accepts array of URLs to analyze
-3. **Author Discovery**: Uses Tomba's `authorFinder` method for each URL
-4. **Data Validation**: Processes and validates author information
-5. **Rate Limiting**: Automatically handles 150 requests/minute limit
-6. **Data Storage**: Saves results to Apify dataset
+## What you can do with it
 
-### What You Get
+| Goal                        | How author data helps                                                 |
+| --------------------------- | --------------------------------------------------------------------- |
+| **Pitch journalists**       | Reach the writers who already cover your topic, with a verified email |
+| **Land guest posts**        | Contact the authors of the blogs you want to appear on                |
+| **Run influencer outreach** | Build lists of content creators and thought leaders in your niche     |
+| **Earn backlinks**          | Find the person behind every article that mentions your competitors   |
+| **Research and interviews** | Reach experts and researchers for quotes, interviews or collaboration |
 
-For each discovered author, you'll receive:
+## Quick start
 
-- **Personal Info**: First name, last name, full name
-- **Email Details**: Verified email address with confidence score
-- **Professional**: Company, position, website URL
-- **Location**: Country information (when available)
-- **Social Media**: Twitter, LinkedIn profiles
-- **Source Tracking**: Multiple sources where author was found
-- **Verification**: Email validation status and metadata
+1. Click **Try for free**
+2. Paste your article or blog post URLs into **URLs to Process**
+3. Click **Start**, then download your results as CSV, Excel or JSON
 
-## Quick Start
+That's it. No Tomba account or API key is needed.
 
-### Prerequisites
+## Input
 
-1. **Tomba Account**: Sign up at [Tomba.io](https://app.tomba.io/api) to get your API credentials
-
-### Getting Your API Keys
-
-1. Visit [Tomba API Dashboard](https://app.tomba.io/api)
-2. Copy your **API Key** (starts with `ta_`)
-3. Copy your **Secret Key** (starts with `ts_`)
-
-## Input Configuration
-
-### Required Parameters
-
-| Parameter        | Type     | Description                            |
-| ---------------- | -------- | -------------------------------------- |
-| `tombaApiKey`    | `string` | Your Tomba API key (ta_xxxx)           |
-| `tombaApiSecret` | `string` | Your Tomba secret key (ts_xxxx)        |
-| `urls`           | `array`  | ` Array of URLs to analyze for authors |
-
-### Optional Parameters
-
-| Parameter    | Type     | Default | Description                         |
-| ------------ | -------- | ------- | ----------------------------------- |
-| `maxResults` | `number` | `50`    | Maximum number of results to return |
-
-### Example Input
+| Field            | Required | Default | Description                                                    |
+| ---------------- | -------- | ------- | -------------------------------------------------------------- |
+| `urls`           | Yes      |         | Article, blog post or author page URLs to analyze              |
+| `maxResults`     | No       | `50`    | Maximum number of URLs to process (one result per URL)         |
+| `webhookUrl`     | No       |         | Your own `http(s)://` URL that Tomba also sends each result to |
+| `maxConcurrency` | No       | `10`    | How many URLs to process at the same time (1–50)               |
+| `maxRetries`     | No       | `3`     | How many times to retry a temporary failure (0–10)             |
+| `useCache`       | No       | `true`  | Reuse results from your previous runs for free                 |
+| `cacheTtlHours`  | No       | `24`    | How long cached results stay valid (`0` turns the cache off)   |
 
 ```json
 {
-    "tombaApiKey": "ta_xxxxxxxxxxxxxxxxxxxx",
-    "tombaApiSecret": "ts_xxxxxxxxxxxxxxxxxxxx",
     "urls": [
         "https://www.shopify.com/blog/self-publish-a-book",
-        "https://blog.hubspot.com/marketing/content-marketing",
-        "https://techcrunch.com/2023/01/15/startup-funding/"
+        "https://blog.hubspot.com/marketing/content-marketing"
     ],
     "maxResults": 100
 }
 ```
 
-### Best Practices
+Duplicate URLs and blank lines are removed automatically.
 
-- **URL Selection**: Choose pages that likely contain author information (blog posts, articles, about pages)
-- **Rate Limits**: The Actor automatically handles Tomba's 150 requests/minute limit
-- **Batch Size**: Process 10-50 URLs at a time for optimal performance
+## Output
 
-## Output Data Structure
-
-The Actor returns detailed author information for each discovered author:
+You get one row per URL:
 
 ```json
 {
-    "email": "author@example.com",
-    "first_name": "John",
+    "email": "jane.doe@shopify.com",
+    "first_name": "Jane",
     "last_name": "Doe",
-    "full_name": "John Doe",
-    "website_url": "example.com",
-    "company": "Example Corp",
+    "full_name": "Jane Doe",
+    "website_url": "shopify.com",
+    "company": "Shopify",
     "position": "Content Writer",
-    "country": "US",
-    "twitter": "https://twitter.com/johndoe",
-    "linkedin": "https://linkedin.com/in/johndoe",
-    "score": 95,
+    "country": "CA",
+    "gender": "female",
+    "twitter": "https://twitter.com/janedoe",
+    "linkedin": "https://www.linkedin.com/in/janedoe",
+    "score": 96,
+    "accept_all": false,
+    "phone_number": false,
     "verification": {
         "date": "2025-10-17T00:00:00+02:00",
         "status": "valid"
     },
     "sources": [
         {
-            "uri": "https://example.com/blog/article",
-            "website_url": "example.com",
+            "uri": "https://www.shopify.com/blog/self-publish-a-book",
+            "website_url": "shopify.com",
             "extracted_on": "2024-09-17T11:26:56+02:00",
             "last_seen_on": "2025-09-06T04:51:06+02:00",
             "still_on_page": true
         }
-    ]
+    ],
+    "input_url": "https://www.shopify.com/blog/self-publish-a-book",
+    "source": "tomba_author_finder",
+    "chargedCredits": 1,
+    "charged": true,
+    "cached": false
 }
 ```
 
-### Data Fields Explained
+| Field                                  | Description                                                  |
+| -------------------------------------- | ------------------------------------------------------------ |
+| `input_url`                            | The URL you submitted                                        |
+| `email`                                | Author's email address (`null` if none was found)            |
+| `first_name`, `last_name`, `full_name` | Author's name                                                |
+| `position`, `company`                  | Author's job title and company                               |
+| `website_url`                          | Website associated with the author                           |
+| `country`, `gender`                    | Author's country and gender, when known                      |
+| `twitter`, `linkedin`                  | Author's social profiles, when known                         |
+| `score`                                | Confidence score from 0 to 100                               |
+| `verification`                         | Email verification date and status (e.g. `valid`)            |
+| `accept_all`                           | `true` if the email domain accepts all addresses (catch-all) |
+| `phone_number`                         | Whether a phone number is available for the author           |
+| `sources`                              | Public pages where the email was found, with dates           |
+| `source`                               | Always `tomba_author_finder`                                 |
+| `chargedCredits`                       | Credits billed for this URL ($0.00312 each)                  |
+| `charged`                              | `true` if this lookup was billed                             |
+| `cached`                               | `true` if this result came from the cache (free)             |
+| `error`                                | Why no author was returned, if applicable                    |
 
-- **Email Verification**: `verification.status` shows email validity
-- **Confidence Score**: `score` (0-100) indicates data reliability
-- **Source Tracking**: `sources` array shows where author was found
-- **Time Stamps**: Track when data was extracted and last verified
-- **Multi-Source**: Authors may be found across multiple pages
+Fields Tomba has no data for are left empty. The dataset has three ready-made views: **Overview**, **Detailed View** and **Source Analysis**.
 
-## Use Cases
+## Pricing
 
-- **Content Attribution**: Identify authors of articles and blog posts
-- **Email Outreach**: Find verified contact information for content creators
-- **Research**: Academic and journalistic research on authorship
-- **Marketing**: Build contact lists for influencer outreach
-- **Verification**: Validate author information across sources
+**$0.00312 per URL ($3.12 per 1,000).** No subscription and no Tomba account needed.
 
-## Resources & Documentation
+Tomba charges **1 credit per URL with an answer**, and one credit costs $0.00312:
 
-### API Documentation
+| Lookup                          | Credits | Cost     |
+| ------------------------------- | ------- | -------- |
+| Author found for the URL        | 1       | $0.00312 |
+| Same lookup with a `webhookUrl` | 1       | $0.00312 |
+| 1,000 URLs with an author       | 1,000   | $3.12    |
 
-- [Tomba API Docs](https://tomba.io/api) - Complete API reference
-- [Authentication Guide](https://app.tomba.io/api) - Get your API keys
-- [Pricing & Limits](https://tomba.io/pricing) - Understand rate limits and costs
+You are only charged when Tomba returns a usable answer:
 
-### Rate Limiting
+| What happens                                    | Charged |
+| ----------------------------------------------- | ------- |
+| Author found for the URL                        | Yes     |
+| Author identified, but no email address found   | Yes     |
+| No author found for the URL                     | No      |
+| Invalid URL or any other error                  | No      |
+| Temporary failure (it is retried automatically) | No      |
+| Result served from the cache                    | No      |
 
-- Tomba limits to **150 requests per minute**
-- Actor automatically handles rate limiting with delays
-- Large batches may take time to complete
+Every row shows `chargedCredits`, `charged` and `cached`, so you always know what you paid for. To cap your spend, set **Maximum cost per run** in the run options: the Actor stops cleanly when the limit is reached.
 
-### Cost Considerations
+## Built for big lists
 
-- Each URL processed = 1 Tomba API request
-- Monitor your Tomba usage dashboard
-- Consider Tomba's pricing tiers for volume usage
+- **No rate limit**: up to 50 URLs are processed at the same time
+- **Automatic retries**: temporary failures are retried for you, and never billed
+- **Resumable**: if a run is interrupted, it continues where it stopped without charging you again
+- **Cache**: repeat lookups within 24 hours are free
+
+## Integrations
+
+Run it on a schedule, call it from the Apify API, or connect it to Zapier, Make, Google Sheets, HubSpot, Slack and hundreds of other apps with [Apify integrations](https://docs.apify.com/platform/integrations). Webhooks let you trigger your own workflow as soon as a run finishes.
 
 ## FAQ
 
-### General Questions
+**Do I need a Tomba account or API key?**
+No. Everything is built in. You only pay the per-URL price on Apify.
 
-**Q: What does author finding do?**
-A: Author finding analyzes web pages to identify and extract author information, including names, contact details, social profiles, and professional information from articles, blog posts, and content pages.
+**How much does it cost?**
+$0.00312 per URL with results ($3.12 per 1,000). URLs with no author, errors and cached lookups are free.
 
-**Q: What types of pages work best for author detection?**
-A: Blog posts, articles, author pages, team pages, and content with clear bylines work best. Pages with structured author information yield the most comprehensive results.
+**Can I send the results to my own system?**
+Yes. Besides Apify integrations, you can set **Webhook URL** and Tomba also sends each result to your endpoint. It costs nothing extra.
 
-**Q: What information can I extract about authors?**
-A: You can get author names, email addresses, social media profiles, bio information, job titles, and links to other authored content.
+**Does it find phone numbers?**
+Each result tells you in `phone_number` whether Tomba has a phone number for the author. To get the number itself, run the author's email or LinkedIn profile through Tomba Phone Finder.
 
-### Technical Questions
+**Which pages work best?**
+Blog posts, news articles and author bio pages with a clear byline. Pages without an author usually return nothing, and those are free.
 
-**Q: How many URLs can I process at once?**
-A: You can process up to 1000 URLs per run. For optimal performance, process 20-50 URLs per batch.
+**How many URLs can I process in one run?**
+Up to 1,000 per run, processed in parallel. There is no rate limit.
 
-**Q: What URL formats are supported?**
-A: Any valid HTTP/HTTPS URL can be processed. Blog posts, article pages, and author bio pages typically yield the best results.
+**Are the emails verified?**
+Yes. Each email comes with its verification status and a confidence score, so you can filter before you send.
 
-**Q: What if a page doesn't have clear author information?**
-A: Some pages may return limited or no author data. This is normal for pages without bylines or clear authorship attribution.
+**What if my run is interrupted?**
+It picks up where it stopped. URLs already processed are not charged again.
 
-### Business Applications
-
-**Q: How can this help with content marketing?**
-A: Find contact information for authors in your industry to build relationships, guest posting opportunities, and content partnerships.
-
-**Q: Is this useful for journalism or research?**
-A: Yes! Identify and contact authors, researchers, and experts for interviews, quotes, or collaboration opportunities.
-
-**Q: Can I use this for influencer outreach?**
-A: Absolutely! Discover content creators and thought leaders in your space, then get their contact information for partnership opportunities.
-
-## Keywords
-
-author finder, email discovery, content attribution, author identification, web scraping, contact extraction, email verification, author detection, content marketing, influencer outreach, research tool, author analysis, email outreach
+**How do I limit what I spend?**
+Set **Maximum cost per run** before you start. The Actor stops as soon as the limit is reached.
 
 ## Support
 
-If you need any help, have questions, or encounter any issues while using Tomba.io, please don't hesitate to reach out to our support team. You can contact us via:
+Questions or feedback? We're happy to help:
 
 - **Email**: support@tomba.io
-- **Live chat**: Available on the Tomba.io website during business hours
-
-## Contributing
-
-We welcome contributions to improve this actor. Please feel free to submit issues, feature requests, or pull requests to help make this tool even better for the community.
+- **Live chat**: on [tomba.io](https://tomba.io) during business hours
+- **Issues**: use the **Issues** tab on this Actor's page
 
 ## About Tomba
 
-Founded in 2020, Tomba prides itself on being the most reliable, accurate, and in-depth source of email address data available anywhere. We process terabytes of data to produce our Email finder API.
+Founded in 2020, [Tomba](https://tomba.io) is a B2B data platform for finding, verifying and enriching business contacts. Our Email Finder, Domain Search and Email Verifier help sales and marketing teams reach the right people.
 
 ![Tomba Logo](https://tomba.io/logo.png)

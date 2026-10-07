@@ -5,7 +5,7 @@
         "type": "object",
         "properties": {
             "email": {
-                "type": "string",
+                "type": ["string", "null"],
                 "description": "Author's email address"
             },
             "first_name": {
@@ -175,9 +175,33 @@
                         }
                     }
                 }
+            },
+            "chargedCredits": {
+                "type": "integer",
+                "description": "Credits billed for this URL ($0.00312 each): 1 when charged, otherwise 0"
+            },
+            "charged": {
+                "type": "boolean",
+                "description": "Whether this request was charged (pay-per-event)"
+            },
+            "cached": {
+                "type": "boolean",
+                "description": "Whether the result came from the cache (free)"
+            },
+            "input_url": {
+                "type": ["string", "null"],
+                "description": "Input article URL"
+            },
+            "source": {
+                "type": "string",
+                "description": "Data source identifier (tomba_author_finder)"
+            },
+            "error": {
+                "type": ["string", "null"],
+                "description": "Error message if the search failed"
             }
         },
-        "required": ["email"]
+        "required": ["input_url", "source"]
     },
     "views": {
         "overview": {
@@ -216,6 +240,7 @@
             "title": "Detailed View",
             "transformation": {
                 "fields": [
+                    "input_url",
                     "email",
                     "first_name",
                     "last_name",
@@ -231,7 +256,12 @@
                     "accept_all",
                     "phone_number",
                     "verification",
-                    "sources"
+                    "sources",
+                    "source",
+                    "error",
+                    "chargedCredits",
+                    "charged",
+                    "cached"
                 ]
             },
             "display": {

@@ -1,112 +1,74 @@
-// Apify SDK - toolkit for building Apify Actors (Read more at https://docs.apify.com/sdk/js/)
-import { Actor } from 'apify';
-// Tomba SDK for author finding
-import { Finder, TombaClient } from 'tomba';
+import { Actor, log } from 'apify';
+import { Finder } from 'tomba';
 
-interface ActorInput {
-    tombaApiKey: string;
-    tombaApiSecret: string;
-    urls?: string[];
+import type { RunOptions } from './tomba.js';
+import { callTomba, isBillable, logSummary, runPool, setupTomba, unique, useRunState } from './tomba.js';
+
+interface ActorInput extends RunOptions {
+    urls: string[];
     maxResults?: number;
+    webhookUrl?: string;
 }
 
-// Rate limiting: 150 requests per minute
-const RATE_LIMIT = 150;
-const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute in milliseconds
-let requestCount = 0;
-let windowStart = Date.now();
+const SOURCE = 'tomba_author_finder';
 
-async function rateLimitedRequest<T>(requestFn: () => Promise<T>): Promise<T> {
-    const now = Date.now();
-
-    // Reset counter if window has passed
-    if (now - windowStart > RATE_LIMIT_WINDOW) {
-        requestCount = 0;
-        windowStart = now;
-    }
-
-    // Check if we've hit the rate limit
-    if (requestCount >= RATE_LIMIT) {
-        const waitTime = RATE_LIMIT_WINDOW - (now - windowStart);
-        console.log(`Rate limit reached. Waiting ${Math.ceil(waitTime / 1000)} seconds...`);
-        await new Promise<void>((resolve) => {
-            setTimeout(() => resolve(), waitTime);
-        });
-
-        // Reset after waiting
-        requestCount = 0;
-        windowStart = Date.now();
-    }
-
-    requestCount++;
-    return await requestFn();
-}
-
-// The init() call configures the Actor for its environment
 await Actor.init();
 
-try {
-    // Get input from the Actor
-    const input = (await Actor.getInput()) as ActorInput;
-
-    if (!input) {
-        throw new Error('No input provided');
-    }
-
-    if (!input.tombaApiKey || !input.tombaApiSecret) {
-        throw new Error('Tomba API key and secret are required');
-    }
-
-    console.log('Starting Tomba Author Finder Actor...');
-    console.log(`Processing ${input.urls?.length || 0} URLs`);
-
-    // Initialize Tomba client
-    const client = new TombaClient();
-    const finder = new Finder(client);
-
-    client.setKey(input.tombaApiKey).setSecret(input.tombaApiSecret);
-
-    const results: unknown[] = [];
-    const maxResults = input.maxResults || 50;
-
-    // Process URLs
-    if (input.urls && input.urls.length > 0) {
-        console.log(`Processing ${input.urls.length} URLs...`);
-
-        for (const url of input.urls) {
-            if (results.length >= maxResults) break;
-
-            try {
-                console.log(`Finding authors for URL: ${url}`);
-
-                // Use Tomba's authorFinder method with rate limiting
-                const tombaResult = await rateLimitedRequest(async () => finder.authorFinder(url));
-
-                if (tombaResult && tombaResult.data) {
-                    // Handle the response structure - tombaResult.data contains the author info
-                    const authorData = tombaResult.data;
-
-                    if (authorData.first_name) {
-                        results.push(authorData);
-                        console.log(`Found author: ${authorData.full_name} (${authorData.email})`);
-                    }
-                }
-            } catch (error) {
-                console.log(`Error processing URL ${url}:`, error);
-            }
-        }
-    }
-
-    if (results.length > 0) {
-        await Actor.pushData(results);
-    }
-
-    // Log summary
-    console.log('=== SUMMARY ===');
-    console.log(`Total authors found: ${results.length}`);
-} catch (error) {
-    console.error('Actor failed:', error);
-    throw error;
+const input = await Actor.getInput<ActorInput>();
+if (!input?.urls?.length) {
+    await Actor.fail('Input must contain at least one URL in "urls".');
 }
+
+const { urls: rawUrls, maxResults = 50, webhookUrl, ...runOptions } = input!;
+const webhook = typeof webhookUrl === 'string' && webhookUrl.trim() ? webhookUrl.trim() : undefined;
+const client = await setupTomba(runOptions);
+const finder = new Finder(client);
+const state = await useRunState();
+
+const urls = unique(rawUrls.map((url) => (typeof url === 'string' ? url.trim() : '')));
+const doneCount = urls.filter((url) => state.done[url]).length;
+const pending = urls.filter((url) => !state.done[url]).slice(0, Math.max(0, maxResults - doneCount));
+if (doneCount > 0) {
+    log.info(`Resuming: ${doneCount} URLs already processed.`);
+}
+
+const startedAt = Date.now();
+log.info(`Finding authors for ${pending.length} URLs`, { webhook: Boolean(webhook) });
+
+await runPool(pending, async (url) => {
+    // Author Finder costs 1 credit per billable URL. `webhook_url` is only sent (and part of the cache key) when set.
+    const params: { url: string; webhook_url?: string } = webhook ? { url, webhook_url: webhook } : { url };
+    const res = await callTomba('author-finder', params, async () => finder.authorFinder(url, params.webhook_url));
+    if (res.skipped) return;
+
+    if (isBillable(res.body)) {
+        const data = res.data as Record<string, unknown>;
+        await Actor.pushData({
+            ...data,
+            input_url: url,
+            source: SOURCE,
+            chargedCredits: res.chargedCount ?? 0,
+            charged: res.charged,
+            cached: res.cached,
+        });
+        const author = data.full_name ?? data.email ?? 'no author found';
+        log.info(`${url}: ${String(author)}${res.cached ? ' (cached)' : ''}`);
+    } else {
+        await Actor.pushData({
+            input_url: url,
+            email: null,
+            source: SOURCE,
+            chargedCredits: 0,
+            charged: res.charged,
+            cached: res.cached,
+            error: res.error ?? 'No author found',
+        });
+        log.info(`${url}: ${res.error ?? 'no author found'}`);
+    }
+
+    state.done[url] = true;
+});
+
+logSummary('Author Finder', urls.length, startedAt);
 
 await Actor.exit();
