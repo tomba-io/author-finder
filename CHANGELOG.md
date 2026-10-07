@@ -32,3 +32,7 @@ All notable changes to this project will be documented in this file. See [standa
 ### [0.0.3](https://github.com/tomba-io/author-finder/compare/v0.0.2...v0.0.3) (2025-10-27)
 
 ### 0.0.2 (2025-10-20)
+
+### Bug Fixes
+
+- Dataset schema accepts `null` for every Tomba field and a boolean or string `phone_number`, so Apify's item validation can't fail a run
