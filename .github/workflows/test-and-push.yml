@@ -49,6 +49,20 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
+            # .actor/actor.json maps TOMBA_API_KEY / TOMBA_API_SECRET to the Apify CLI secrets
+            # @tombaApiKey / @tombaApiSecret, which `apify push` reads from ~/.apify/secrets.json.
+            - name: Provide Tomba secrets to the Apify CLI
+              env:
+                  TOMBA_API_KEY: ${{ secrets.TOMBA_API_KEY }}
+                  TOMBA_API_SECRET: ${{ secrets.TOMBA_API_SECRET }}
+              run: |
+                  if [ -z "$TOMBA_API_KEY" ] || [ -z "$TOMBA_API_SECRET" ]; then
+                      echo "::error::Add the TOMBA_API_KEY and TOMBA_API_SECRET repository secrets."
+                      exit 1
+                  fi
+                  mkdir -p ~/.apify
+                  node -e 'require("fs").writeFileSync(require("os").homedir() + "/.apify/secrets.json", JSON.stringify({ tombaApiKey: process.env.TOMBA_API_KEY, tombaApiSecret: process.env.TOMBA_API_SECRET }))'
+
             - name: Push Actor to Apify
               id: push
               uses: apify/push-actor-action@v1
